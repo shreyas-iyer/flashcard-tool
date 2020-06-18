@@ -34,6 +34,12 @@ class App extends React.Component {
     }
   };
 
+  editCards = (index, side, newVal) => {
+    const cards = this.state.cards.slice();
+    cards[index][side] = newVal;
+    this.setState({ cards });
+  };
+
   render() {
     if (this.state.editor) {
       return (
@@ -42,10 +48,16 @@ class App extends React.Component {
           deleteCard={this.deleteCard}
           cards={this.state.cards}
           switchMode={this.switchMode}
+          editCards={this.editCards}
         />
       );
     } else {
-      return <CardViewer cards={this.state.cards} switchMode={this.switchMode} />;
+      return (
+        <CardViewer
+          cards={this.state.cards}
+          switchMode={this.switchMode}
+        />
+      );
     }
   }
 }

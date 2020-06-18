@@ -16,6 +16,10 @@ class CardEditor extends React.Component {
 
   deleteCard = index => this.props.deleteCard(index);
 
+  editCards = (index, side, event) => {
+    this.props.editCards(index, side, event.target.value)
+  };
+
   handleChange = event =>
     this.setState({ [event.target.name]: event.target.value });
 
@@ -30,8 +34,18 @@ class CardEditor extends React.Component {
       return (
         <tr key={index}>
           <td>{index+1}</td>
-          <td>{card.front}</td>
-          <td>{card.back}</td>
+          <td>
+            <input
+              onChange={event => this.editCards(index, 'front', event)}
+              value={card.front}
+            />
+          </td>
+          <td>
+            <input
+              onChange={event => this.editCards(index, 'back', event)}
+              value={card.back}
+            />
+          </td>
           <td>
             <button onClick={() => this.deleteCard(index)}>Delete card</button>
           </td>
@@ -45,11 +59,7 @@ class CardEditor extends React.Component {
         <table>
           <thead>
             <tr>
-<<<<<<< HEAD
               <th></th>
-=======
-              <th>Number</th>
->>>>>>> 182de99... fixed bugs
               <th>Front</th>
               <th>Back</th>
               <th>Delete</th>
