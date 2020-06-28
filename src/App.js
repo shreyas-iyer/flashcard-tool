@@ -4,6 +4,7 @@ import CardViewer from './CardViewer';
 import HomePage from './Homepage';
 import {Switch, Route} from 'react-router-dom';
 
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -49,8 +50,11 @@ class App extends React.Component {
             editCards={this.editCards}
           />
         </Route>
-        <Route exact path='/viewer'>
-          <CardViewer cards={this.state.cards}/>
+        <Route exact path='/viewer/:deckID'>
+          <CardViewer />
+        </Route>
+        <Route>
+          <div>Page not found!</div>
         </Route>
       </Switch>
     );

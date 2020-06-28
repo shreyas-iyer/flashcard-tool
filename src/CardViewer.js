@@ -1,12 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import "./CardViewer.css";
+
+import { firebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase';
+import { connect } from 'react-redux';
+import {compose } from 'redux';
+import { Link, withRouter } from 'react-router-dom';
 
 class CardViewer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { index: 0, isFlipped: false, cards: props.cards };
-    this.numCards = this.props.cards.length;
+    this.state = { cards : props.cards, index: 0, isFlipped: false };
   }
 
   componentDidMount() {
@@ -33,7 +36,7 @@ class CardViewer extends React.Component {
     }
 
     else if (event.key === 'ArrowRight' &&
-             this.state.index !== this.numCards - 1) {
+             this.state.index !== this.props.cards.length - 1) {
       this.nextCard()
     }
 
@@ -45,7 +48,7 @@ class CardViewer extends React.Component {
   shuffleCards = () => {
     const cards = this.state.cards.slice();
 
-    for (let i = this.numCards - 1; i > 0; i--) {
+    for (let i = this.state.cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [cards[i], cards[j]] = [cards[j], cards[i]];
     }
@@ -53,7 +56,21 @@ class CardViewer extends React.Component {
     this.setState({ cards });
   };
 
+  componentDidUpdate(prevProps) {
+    if (this.props.cards !== prevProps.cards) {
+      this.setState({ cards: this.props.cards });
+    }
+  };
+
   render () {
+    if (!isLoaded(this.state.cards)) {
+      return <div>Loading...</div>
+    }
+
+    if(isEmpty(this.state.cards)) {
+      return <div>Page not found!</div>;
+    }
+
     let value;
     if (this.state.isFlipped) {
       value = this.state.cards[this.state.index].back
@@ -63,7 +80,7 @@ class CardViewer extends React.Component {
 
     return (
       <div>
-        <h2>Card Viewer</h2>
+        <h2>{this.props.name}</h2>
         <div onClick={this.flipCard} className="card">{value}</div>
         <br/>
         <button
@@ -74,18 +91,34 @@ class CardViewer extends React.Component {
         </button>
         <button
           onClick={this.nextCard}
-          disabled={this.state.index === this.numCards - 1}
+          disabled={this.state.index === this.state.cards.length - 1}
         >
           Next card
         </button>
         <button onClick={this.shuffleCards}>Shuffle Cards </button>
         <hr/>
-        <div>Card {this.state.index+1} out of {this.numCards}</div>
+        <div>Card {this.state.index+1} out of {this.state.cards.length}</div>
         <hr/>
-        <Link to='/editor'>Go To Card Editor</Link>
+        <Link to='/'>Home</Link>
       </div>
     );
   }
 }
 
-export default CardViewer;
+const mapStateToProps = (state, props) => {
+  console.log(state);
+  const deck = state.firebase.data[props.match.params.deckID];
+  const name = deck && deck.name;
+  const cards = deck && deck.cards;
+  return { cards: cards, name: name};
+};
+
+export default compose(
+  withRouter,
+  firebaseConnect(props => {
+    console.log('props', props)
+    const deckID = props.match.params.deckID;
+    return [{ path: `/flashcards/${deckID}`, storeAs: deckID }];
+  }),
+  connect(mapStateToProps),
+)(CardViewer);
