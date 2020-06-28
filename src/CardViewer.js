@@ -81,6 +81,7 @@ class CardViewer extends React.Component {
     return (
       <div>
         <h2>{this.props.name}</h2>
+        <h5>Description: {this.props.description}</h5>
         <div onClick={this.flipCard} className="card">{value}</div>
         <br/>
         <button
@@ -110,13 +111,13 @@ const mapStateToProps = (state, props) => {
   const deck = state.firebase.data[props.match.params.deckID];
   const name = deck && deck.name;
   const cards = deck && deck.cards;
-  return { cards: cards, name: name};
+  const description = deck && deck.description;
+  return { cards: cards, name: name, description: description };
 };
 
 export default compose(
   withRouter,
   firebaseConnect(props => {
-    console.log('props', props)
     const deckID = props.match.params.deckID;
     return [{ path: `/flashcards/${deckID}`, storeAs: deckID }];
   }),

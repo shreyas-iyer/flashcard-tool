@@ -16,17 +16,20 @@ class CardEditor extends React.Component {
       front: '',
       back: '',
       name: '',
+      description: '',
      };
   }
 
   createDeck = () => {
     const deckID = this.props.firebase.push('/flashcards').key;
-    const newDeck =  {cards : this.state.cards, name: this.state.name};
-    const onComplete = () => {
-      console.log('database updated');
-      this.props.history.push(`/viewer/${deckID}`);
-    };
-    this.props.firebase.update(`/flashcards/${deckID}`, newDeck, onComplete);
+    const updates = {};
+    const newDeck = {cards: this.state.cards,
+                     name: this.state.name,
+                     description: this.state.description};
+    updates[`/flashcards/${deckID}`] = newDeck;
+    updates[`/homepage/${deckID}`] = { name : this.state.name }
+    const onComplete = () => this.props.history.push(`/viewer/${deckID}`);
+    this.props.firebase.update("/", updates, onComplete);
   };
 
   addCard = () => {
@@ -94,12 +97,23 @@ class CardEditor extends React.Component {
         <h2>Card Editor</h2>
         <div>
           Deck Name:
+          <br/>
           <input
             name="name"
             placeholder="Name of Deck"
             value={this.state.name}
             onChange={this.handleChange}
           />
+        <br/>
+        <br/>
+        Deck Description:
+        <br/>
+        <input
+          name="description"
+          placeholder="Description of Deck"
+          value={this.state.description}
+          onChange={this.handleChange}
+        />
         </div>
         <br/>
         <table>
@@ -132,7 +146,9 @@ class CardEditor extends React.Component {
         <hr/>
         <div>
           <button
-            disabled={!this.state.name.trim() || this.state.cards.length === 0}
+            disabled={!this.state.name.trim() ||
+                      !this.state.description.trim() ||
+                      this.state.cards.length === 0}
             onClick={this.createDeck}
           >
             Create Deck
